@@ -27,3 +27,4 @@ lerna-debug.log*
 settings
 history.txt
 costs-reports.txt
+counter/settings/*.toml
