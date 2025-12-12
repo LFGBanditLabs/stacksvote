@@ -1,181 +1,268 @@
-# Stacks Voting DApp
+# 🗳️ StacksVote
 
-A decentralized voting application built on the Stacks blockchain using Clarity 4 smart contracts.
+> A decentralized voting platform built on Stacks blockchain with Clarity 4 smart contracts and Next.js
 
-## Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Stacks](https://img.shields.io/badge/Stacks-Blockchain-5546FF)](https://www.stacks.co/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![Clarity](https://img.shields.io/badge/Clarity-4-blue)](https://clarity-lang.org/)
+
+## ✨ Features
 
 ### Smart Contract (Clarity 4)
-- ✅ **Create Proposals**: Anyone can create proposals with title, description, and duration
-- ✅ **Vote on Proposals**: Cast weighted votes (Yes/No) on active proposals
-- ✅ **Voter Weights**: Contract owner can assign different voting weights to users
-- ✅ **Execute Proposals**: Mark proposals as executed after voting period ends
-- ✅ **Read-only Functions**: Query proposal details, vote counts, and status
-- ✅ **Clarity 4 Features**: Uses improved string handling, map operations, and optional handling
+- 📝 **Create Proposals** - Anyone can submit proposals with title, description, and voting period
+- 🗳️ **Weighted Voting** - Cast votes with customizable voting weights
+- ⚖️ **Fair Governance** - Transparent, on-chain voting mechanism
+- ⏰ **Time-based Voting** - Proposals have defined start and end blocks
+- 🔒 **Immutable Results** - All votes permanently recorded on blockchain
+- ✅ **Proposal Execution** - Execute passed proposals after voting ends
 
-### Frontend (React + Stacks Connect)
-- 🎨 Modern, responsive UI with gradient design
-- 🔐 Wallet connection with Stacks Connect
-- 📝 Create new proposals with form validation
-- 🗳️ Vote on active proposals
-- 📊 Real-time vote tracking with progress bars
-- 🔄 Refresh proposals to see latest data
-- 📱 Mobile-friendly responsive design
+### Frontend (Next.js 15)
+- 🎨 Modern, glassmorphic UI design
+- 🔐 Seamless wallet integration (Hiro/Leather)
+- 📱 Fully responsive mobile-first design
+- ⚡ Real-time proposal updates
+- 🌈 Beautiful gradient animations
+- 🔄 Automatic vote counting and progress tracking
 
-## Project Structure
+---
 
-```
-stacks/
-├── contracts/
-│   └── voting.clar           # Clarity 4 voting smart contract
-├── src/
-│   ├── components/
-│   │   ├── Header.jsx        # Header with wallet connection
-│   │   ├── ProposalForm.jsx  # Create new proposals
-│   │   ├── ProposalList.jsx  # List all proposals
-│   │   └── ProposalCard.jsx  # Individual proposal card with voting
-│   ├── App.jsx               # Main application component
-│   ├── App.css
-│   ├── index.css             # Global styles
-│   └── main.jsx
-├── index.html
-├── vite.config.js
-└── package.json
-```
-
-## Smart Contract Functions
-
-### Public Functions
-- `create-proposal(title, description, duration)` - Create a new proposal
-- `cast-vote(proposal-id, vote-choice)` - Vote on a proposal (true = yes, false = no)
-- `set-voter-weight(voter, weight)` - Set voting weight for a user (owner only)
-- `execute-proposal(proposal-id)` - Execute a proposal after voting ends
-
-### Read-only Functions
-- `get-proposal(proposal-id)` - Get proposal details
-- `get-vote(proposal-id, voter)` - Get vote details for a voter
-- `get-voter-weight(voter)` - Get voting weight of a user
-- `get-proposal-count()` - Get total number of proposals
-- `is-proposal-active(proposal-id)` - Check if proposal is active
-- `get-proposal-result(proposal-id)` - Get proposal results
-
-## Setup Instructions
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v18 or higher)
+- Node.js 18+ 
 - npm or yarn
-- Hiro Wallet browser extension
+- [Hiro Wallet](https://wallet.hiro.so/) or [Leather Wallet](https://leather.io/)
+- [Clarinet](https://github.com/hirosystems/clarinet) (for deployment)
 
 ### Installation
 
-1. **Install dependencies:**
+1. **Clone the repository**
    ```bash
+   git clone https://github.com/LFGBanditLabs/stacksvote.git
+   cd stacksvote
+   ```
+
+2. **Install frontend dependencies**
+   ```bash
+   cd voting-frontend
    npm install
    ```
 
-2. **Start the development server:**
+3. **Start development server**
    ```bash
    npm run dev
    ```
 
-3. **Open your browser:**
-   Navigate to `http://localhost:3000`
-
-### Deploy the Smart Contract
-
-1. **Using Clarinet (recommended):**
-   ```bash
-   # Install Clarinet
-   # Visit: https://docs.hiro.so/clarinet/installation
-
-   # Initialize Clarinet project
-   clarinet integrate
-
-   # Deploy to testnet
-   clarinet deploy --testnet
+4. **Open your browser**
+   ```
+   http://localhost:3000
    ```
 
-2. **Using Hiro Platform:**
-   - Visit [Hiro Platform](https://platform.hiro.so/)
-   - Create a new project
-   - Deploy the contract from `contracts/voting.clar`
-   - Copy the deployed contract address
+---
 
-3. **Update Frontend:**
-   - Paste the contract address in the "Contract Configuration" field in the app
+## 📂 Project Structure
 
-## Usage
+```
+stacksvote/
+├── counter/                      # Clarity smart contract project
+│   ├── contracts/
+│   │   └── voting.clar          # Main voting contract
+│   ├── tests/
+│   │   └── voting.test.ts       # Contract tests
+│   ├── settings/
+│   │   └── Mainnet.toml         # Deployment configuration
+│   └── Clarinet.toml            # Clarinet project config
+│
+└── voting-frontend/             # Next.js frontend application
+    ├── app/
+    │   ├── page.tsx             # Homepage
+    │   ├── create/
+    │   │   └── page.tsx         # Create proposal page
+    │   └── layout.tsx           # Root layout
+    ├── components/
+    │   ├── Header.tsx           # Navigation header
+    │   ├── ProposalCard.tsx     # Proposal display component
+    │   └── ProposalList.tsx     # Proposal listing
+    ├── contexts/
+    │   └── AuthContext.tsx      # Wallet authentication
+    ├── lib/
+    │   ├── stacks.ts            # Blockchain interactions
+    │   └── constants.ts         # App configuration
+    └── package.json
+```
 
-### Connect Wallet
-1. Click "Connect Wallet" in the header
-2. Approve the connection in your Hiro Wallet
+---
 
-### Create a Proposal
-1. Fill in the proposal title (max 100 characters)
-2. Add a description (max 500 characters)
-3. Set duration in blocks (144 blocks ≈ 1 day)
-4. Click "Create Proposal" and approve the transaction
+## 🔧 Smart Contract
 
-### Vote on Proposals
-1. Browse active proposals
-2. Click "Vote Yes" or "Vote No"
-3. Approve the transaction in your wallet
-4. Wait for transaction confirmation
+### Public Functions
 
-### View Results
-- Vote counts are displayed in real-time
-- Progress bars show percentage of Yes/No votes
-- Refresh to see latest vote counts
+#### `create-proposal`
+```clarity
+(create-proposal (title (string-utf8 256)) 
+                 (description (string-utf8 1024)) 
+                 (duration uint))
+```
+Create a new proposal with voting duration in blocks (~10 minutes per 100 blocks).
 
-## Clarity 4 Features Used
+#### `cast-vote`
+```clarity
+(cast-vote (proposal-id uint) (vote-choice bool))
+```
+Vote on a proposal. `true` = Yes, `false` = No. Uses voter's weight.
 
-1. **String-UTF8 Support**: Better string handling for titles and descriptions
-2. **Enhanced Map Operations**: Efficient storage and retrieval of proposals and votes
-3. **Improved Optional Handling**: Better `match` and `unwrap` operations
-4. **Merge Function**: Update map values efficiently
+#### `set-voter-weight`
+```clarity
+(set-voter-weight (voter principal) (weight uint))
+```
+Set voting weight for a user (owner only). Default weight is 1.
 
-## Development
+#### `execute-proposal`
+```clarity
+(execute-proposal (proposal-id uint))
+```
+Mark proposal as executed after voting period ends.
 
-### Build for Production
+### Read-only Functions
+
+- `get-proposal(proposal-id)` - Retrieve proposal details
+- `get-proposal-count()` - Total number of proposals
+- `is-proposal-active(proposal-id)` - Check if voting is active
+- `get-proposal-result(proposal-id)` - Get voting results
+- `get-voter-weight(voter)` - Get user's voting weight
+- `get-vote(proposal-id, voter)` - Get specific vote details
+
+---
+
+## 🌐 Deployment
+
+### Deploy Smart Contract
+
+1. **Configure deployment**
+   ```bash
+   cd counter
+   cp settings/Mainnet.toml.example settings/Mainnet.toml
+   # Add your mnemonic to Mainnet.toml
+   ```
+
+2. **Generate deployment plan**
+   ```bash
+   clarinet deployments generate --mainnet
+   ```
+
+3. **Deploy to mainnet**
+   ```bash
+   clarinet deployments apply --mainnet
+   ```
+
+### Deploy Frontend (Vercel)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/LFGBanditLabs/stacksvote)
+
+Or manually:
+
 ```bash
+cd voting-frontend
 npm run build
+npm start
 ```
 
-### Preview Production Build
+---
+
+## 🧪 Testing
+
+### Smart Contract Tests
 ```bash
-npm run preview
+cd counter
+npm test
 ```
 
-## Technologies
+### Frontend Development
+```bash
+cd voting-frontend
+npm run dev
+```
 
-- **Blockchain**: Stacks Blockchain
-- **Smart Contract**: Clarity 4
-- **Frontend**: React 18
-- **Build Tool**: Vite
-- **Wallet Integration**: @stacks/connect
-- **Transaction Library**: @stacks/transactions
-- **Network**: @stacks/network
+---
 
-## Security Considerations
+## 🎯 Usage
 
-- Contract owner has special privileges (set voter weights)
-- Users cannot vote twice on the same proposal
-- Voting is only allowed during the active period
-- Proposals cannot be executed before voting ends
+### Creating a Proposal
 
-## Future Enhancements
+1. Connect your Stacks wallet
+2. Click "Create New Proposal"
+3. Fill in:
+   - **Title**: Short proposal name
+   - **Description**: Detailed explanation
+   - **Duration**: Voting period (in blocks)
+4. Submit and confirm transaction
 
-- [ ] Add proposal categories
-- [ ] Implement quadratic voting
-- [ ] Add delegation system
-- [ ] Create proposal templates
-- [ ] Add notification system
-- [ ] Implement time-locked voting
-- [ ] Add analytics dashboard
+### Voting on Proposals
 
-## License
+1. Browse active proposals on homepage
+2. Click "Vote Yes" or "Vote No"
+3. Confirm transaction in wallet
+4. Vote is recorded on-chain
 
-MIT
+### Viewing Results
 
-## Support
+- Progress bars show current vote distribution
+- Total votes displayed for each option
+- Proposal status indicates if voting is active
 
-For issues or questions, please open an issue on the GitHub repository.
+---
+
+## 🛠️ Configuration
+
+### Update Contract Address
+
+Edit `voting-frontend/lib/constants.ts`:
+
+```typescript
+export const CONTRACT_ADDRESS = 'YOUR_CONTRACT_ADDRESS';
+export const CONTRACT_NAME = 'voting';
+export const NETWORK = 'mainnet'; // or 'testnet'
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- Built with [Stacks](https://www.stacks.co/)
+- Frontend powered by [Next.js](https://nextjs.org/)
+- Smart contracts in [Clarity](https://clarity-lang.org/)
+- UI styled with [Tailwind CSS](https://tailwindcss.com/)
+- Wallet integration via [@stacks/connect](https://github.com/hirosystems/connect)
+
+---
+
+## 📞 Support
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/LFGBanditLabs/stacksvote/issues)
+- **Stacks Discord**: [Join the community](https://discord.gg/stacks)
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by <a href="https://github.com/LFGBanditLabs">LFGBanditLabs</a></p>
+  <p>⭐ Star this repo if you find it useful!</p>
+</div>
