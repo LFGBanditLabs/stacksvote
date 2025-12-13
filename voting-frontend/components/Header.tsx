@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
 export default function Header() {
-  const { userData, connectWallet, disconnectWallet } = useAuth();
+  const { stxAddress, connectWallet, disconnectWallet } = useAuth();
 
   return (
     <header className="backdrop-blur-xl bg-white/80 border-b border-white/20 sticky top-0 z-50 shadow-lg shadow-purple-500/10">
@@ -38,11 +38,11 @@ export default function Header() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 group-hover:w-full transition-all duration-300"></span>
             </Link>
 
-            {userData ? (
+            {stxAddress ? (
               <div className="flex items-center space-x-3">
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200/50 px-4 py-2.5 rounded-xl backdrop-blur-sm">
                   <span className="text-sm font-mono font-bold text-purple-700">
-                    {userData.profile.stxAddress.mainnet.slice(0, 6)}...{userData.profile.stxAddress.mainnet.slice(-4)}
+                    {stxAddress.slice(0, 6)}...{stxAddress.slice(-4)}
                   </span>
                 </div>
                 <button
