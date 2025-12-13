@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  webpack: (config) => {
-    config.externals.push('pino-pretty', 'lokijs', 'encoding');
-    return config;
+  turbopack: {
+    // Silence the turbopack webpack config warning
   },
+  serverExternalPackages: ['pino', 'pino-pretty'],
   // Exclude test files and non-JS files from build
   transpilePackages: ['@stacks/connect'],
 };
