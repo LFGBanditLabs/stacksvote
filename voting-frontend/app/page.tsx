@@ -4,6 +4,9 @@ import ProposalList from '@/components/ProposalList';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const { stxAddress, connectWallet } = useAuth();
 

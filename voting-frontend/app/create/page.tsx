@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { createProposal } from '@/lib/stacks';
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
+
 export default function CreateProposal() {
   const router = useRouter();
   const { userData, connectWallet } = useAuth();
