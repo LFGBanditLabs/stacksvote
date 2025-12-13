@@ -6,6 +6,13 @@
 [![Stacks](https://img.shields.io/badge/Stacks-Blockchain-5546FF)](https://www.stacks.co/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![Clarity](https://img.shields.io/badge/Clarity-4-blue)](https://clarity-lang.org/)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/LFGBanditLabs/stacksvote)
+
+## 🎯 Live Demo
+
+**[View Live Application →](https://stacksvote.vercel.app)**
+
+Contract Address: `SP1C5DP9C9N2MB8DMZN18EJNSSA3GYNJE3DGN806V.voting`
 
 ## ✨ Features
 
