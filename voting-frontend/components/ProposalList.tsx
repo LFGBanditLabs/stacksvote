@@ -78,7 +78,7 @@ export default function ProposalList() {
           Active Proposals ({proposals.length})
         </h2>
         <button
-          onClick={refreshProposals}
+          onClick={fetchProposals}
           className="bg-white hover:bg-white/90 text-purple-600 px-6 py-3 rounded-xl transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center gap-2"
         >
           <span className="text-xl">🔄</span> Refresh
