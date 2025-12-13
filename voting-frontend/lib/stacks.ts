@@ -5,8 +5,6 @@ import {
   stringUtf8CV,
   uintCV,
   boolCV,
-  FungibleConditionCode,
-  makeStandardSTXPostCondition,
   cvToJSON,
   fetchCallReadOnlyFunction,
 } from '@stacks/transactions';
@@ -107,8 +105,16 @@ export const getProposal = async (proposalId: number): Promise<Proposal | null> 
 
     const jsonResult = cvToJSON(result);
     
-    if (jsonResult.value && jsonResult.value.value) {
-      const proposalData = jsonResult.value.value;
+    // Check if result is valid - it's wrapped in response -> optional -> tuple
+    if (!jsonResult || !jsonResult.value || !jsonResult.value.value || !jsonResult.value.value.value) {
+      console.log(`Proposal ${proposalId} not found`);
+      return null;
+    }
+    
+    // Get the actual proposal data from the nested structure
+    const proposalData = jsonResult.value.value.value;
+    
+    try {
       return {
         id: proposalId,
         title: proposalData.title.value,
@@ -120,26 +126,41 @@ export const getProposal = async (proposalId: number): Promise<Proposal | null> 
         endBlock: parseInt(proposalData['end-block'].value),
         executed: proposalData.executed.value,
       };
+    } catch (err) {
+      console.error(`Error parsing proposal ${proposalId}:`, err);
+      console.log('Proposal data:', proposalData);
+      return null;
     }
-    return null;
   } catch (error) {
-    console.error('Error fetching proposal:', error);
+    console.error(`Error fetching proposal ${proposalId}:`, error);
     return null;
   }
 };
 
 export const getAllProposals = async (): Promise<Proposal[]> => {
-  const count = await getProposalCount();
-  const proposals: Proposal[] = [];
-
-  for (let i = 1; i <= count; i++) {
-    const proposal = await getProposal(i);
-    if (proposal) {
-      proposals.push(proposal);
+  try {
+    const count = await getProposalCount();
+    console.log(`Fetching ${count} proposals...`);
+    
+    if (count === 0) {
+      console.log('No proposals found in contract');
+      return [];
     }
-  }
+    
+    const proposals: Proposal[] = [];
 
-  return proposals.reverse(); // Show newest first
+    for (let i = 1; i <= count; i++) {
+      const proposal = await getProposal(i);
+      if (proposal) {
+        proposals.push(proposal);
+      }
+    }
+
+    return proposals.reverse(); // Show newest first
+  } catch (error) {
+    console.error('Error fetching all proposals:', error);
+    return [];
+  }
 };
 
 export const isProposalActive = async (proposalId: number): Promise<boolean> => {

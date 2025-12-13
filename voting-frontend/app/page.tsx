@@ -4,8 +4,11 @@ import ProposalList from '@/components/ProposalList';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
-  const { userData, connectWallet } = useAuth();
+  const { stxAddress, connectWallet } = useAuth();
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -23,7 +26,7 @@ export default function Home() {
           Create proposals and vote on important decisions using secure blockchain technology
         </p>
 
-        {!userData && (
+        {!stxAddress && (
           <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-10 max-w-lg mx-auto shadow-2xl border border-white/50 hover:shadow-3xl transition-all duration-300">
             <div className="text-5xl mb-6 text-center">🔐</div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">
@@ -41,7 +44,7 @@ export default function Home() {
           </div>
         )}
 
-        {userData && (
+        {stxAddress && (
           <Link
             href="/create"
             className="inline-block bg-white hover:bg-white/90 text-purple-600 px-10 py-4 rounded-2xl transition-all duration-300 font-bold text-xl shadow-2xl hover:shadow-3xl hover:scale-105 active:scale-95 border-2 border-white/50"

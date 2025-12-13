@@ -1,79 +1,81 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppConfig, UserSession, connect } from '@stacks/connect';
-
-interface UserData {
-  profile: {
-    stxAddress: {
-      mainnet: string;
-      testnet: string;
-    };
-  };
-}
+import { connect, disconnect, isConnected, getLocalStorage, type StorageData } from '@stacks/connect';
 
 interface AuthContextType {
-  userData: UserData | null;
-  userSession: UserSession;
+  userData: StorageData | null;
+  stxAddress: string | null;
   connectWallet: () => void;
   disconnectWallet: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const appConfig = new AppConfig(['store_write', 'publish_data']);
-const userSession = new UserSession({ appConfig });
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<StorageData | null>(null);
+  const [stxAddress, setStxAddress] = useState<string | null>(null);
 
   useEffect(() => {
-    if (userSession.isSignInPending()) {
-      userSession.handlePendingSignIn().then((userData: any) => {
-        setUserData(userData);
-      });
-    } else if (userSession.isUserSignedIn()) {
-      setUserData(userSession.loadUserData());
+    console.log('AuthProvider mounted');
+    
+    // Check if user is already connected
+    if (isConnected()) {
+      console.log('✅ User is connected');
+      const data = getLocalStorage();
+      console.log('User data from storage:', data);
+      
+      if (data?.addresses?.stx?.[0]) {
+        setUserData(data);
+        setStxAddress(data.addresses.stx[0].address);
+        console.log('STX Address:', data.addresses.stx[0].address);
+      }
+    } else {
+      console.log('❌ User not connected');
     }
   }, []);
 
   const connectWallet = async () => {
+    console.log('🔌 Connect wallet clicked');
+    
     try {
-      const result = await connect({
-        appDetails: {
-          name: 'Stacks Voting DApp',
-          icon: typeof window !== 'undefined' ? window.location.origin + '/logo.png' : '',
-        },
-        onFinish: () => {
-          // Reload user data after connection
-          if (userSession.isUserSignedIn()) {
-            const userData = userSession.loadUserData();
-            setUserData(userData);
-          }
-        },
-        userSession,
-      });
-      
-      // Update user data immediately after connection
-      if (result && userSession.isUserSignedIn()) {
-        const userData = userSession.loadUserData();
-        setUserData(userData);
+      if (isConnected()) {
+        console.log('⚠️ Already connected');
+        return;
       }
+
+      console.log('Calling connect()...');
+      const response = await connect();
+      
+      console.log('✅ Connected! Response:', response);
+      console.log('Addresses:', response.addresses);
+      
+      // Update state with new data
+      const data = getLocalStorage();
+      if (data?.addresses?.stx?.[0]) {
+        setUserData(data);
+        setStxAddress(data.addresses.stx[0].address);
+        console.log('✅ STX Address set:', data.addresses.stx[0].address);
+      }
+      
     } catch (error) {
-      console.error('Failed to connect wallet:', error);
+      console.error('❌ Failed to connect wallet:', error);
     }
   };
 
   const disconnectWallet = () => {
-    userSession.signUserOut('/');
+    console.log('🔌 Disconnecting wallet...');
+    disconnect();
     setUserData(null);
+    setStxAddress(null);
+    console.log('✅ Wallet disconnected');
   };
 
   return (
     <AuthContext.Provider
       value={{
         userData,
-        userSession,
+        stxAddress,
         connectWallet,
         disconnectWallet,
       }}
