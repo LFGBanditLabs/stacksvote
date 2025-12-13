@@ -1,17 +1,10 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { connect, disconnect, isConnected, getLocalStorage } from '@stacks/connect';
-
-interface UserData {
-  addresses: {
-    stx: Array<{ address: string; network: string }>;
-    btc: Array<{ address: string; network: string }>;
-  };
-}
+import { connect, disconnect, isConnected, getLocalStorage, type StorageData } from '@stacks/connect';
 
 interface AuthContextType {
-  userData: UserData | null;
+  userData: StorageData | null;
   stxAddress: string | null;
   connectWallet: () => void;
   disconnectWallet: () => void;
@@ -20,7 +13,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<StorageData | null>(null);
   const [stxAddress, setStxAddress] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('User data from storage:', data);
       
       if (data?.addresses?.stx?.[0]) {
-        setUserData(data as UserData);
+        setUserData(data);
         setStxAddress(data.addresses.stx[0].address);
         console.log('STX Address:', data.addresses.stx[0].address);
       }
