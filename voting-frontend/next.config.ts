@@ -1,12 +1,21 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    // Silence the turbopack webpack config warning
+  experimental: {
+    turbo: {
+      resolveExtensions: [
+        '.mdx',
+        '.tsx',
+        '.ts',
+        '.jsx',
+        '.js',
+        '.mjs',
+        '.json',
+      ],
+    },
   },
-  serverExternalPackages: ['pino', 'pino-pretty'],
-  // Exclude test files and non-JS files from build
-  transpilePackages: ['@stacks/connect'],
+  serverExternalPackages: ['pino', 'pino-pretty', 'lokijs', 'encoding'],
+  transpilePackages: ['@stacks/connect', '@walletconnect/universal-provider'],
 };
 
 export default nextConfig;
