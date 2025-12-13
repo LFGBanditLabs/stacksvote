@@ -5,8 +5,6 @@ import {
   stringUtf8CV,
   uintCV,
   boolCV,
-  FungibleConditionCode,
-  makeStandardSTXPostCondition,
   cvToJSON,
   fetchCallReadOnlyFunction,
 } from '@stacks/transactions';

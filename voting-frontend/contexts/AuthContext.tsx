@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Update state with new data
       const data = getLocalStorage();
       if (data?.addresses?.stx?.[0]) {
-        setUserData(data as UserData);
+        setUserData(data);
         setStxAddress(data.addresses.stx[0].address);
         console.log('✅ STX Address set:', data.addresses.stx[0].address);
       }
