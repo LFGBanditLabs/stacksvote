@@ -8,6 +8,7 @@ export default function ProposalList() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchProposals = async () => {
     setLoading(true);
@@ -70,6 +71,13 @@ export default function ProposalList() {
     );
   }
 
+  // Filter proposals based on search query
+  const filteredProposals = proposals.filter(
+    (proposal) =>
+      proposal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      proposal.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -85,15 +93,48 @@ export default function ProposalList() {
         </button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-        {proposals.map((proposal) => (
-          <ProposalCard
-            key={proposal.id}
-            proposal={proposal}
-            onVoteSuccess={fetchProposals}
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="🔍 Search proposals by title or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-6 py-4 pl-14 rounded-2xl border-2 border-white/50 bg-white/95 backdrop-blur-xl shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-400 transition-all text-gray-800 placeholder-gray-500 font-medium"
           />
-        ))}
+          <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-2xl">🔍</span>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xl"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        {searchQuery && (
+          <p className="text-white mt-2 ml-2 font-medium">
+            Found {filteredProposals.length} proposal{filteredProposals.length !== 1 ? 's' : ''}
+          </p>
+        )}
       </div>
+
+      {filteredProposals.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-xl shadow-md">
+          <p className="text-xl text-gray-600">No proposals match your search.</p>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+          {filteredProposals.map((proposal) => (
+            <ProposalCard
+              key={proposal.id}
+              proposal={proposal}
+              onVoteSuccess={fetchProposals}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
