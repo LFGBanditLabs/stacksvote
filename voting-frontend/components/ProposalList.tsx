@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getAllProposals, Proposal } from '@/lib/stacks';
 import ProposalCard from '@/components/ProposalCard';
+import ProposalSkeleton from '@/components/ProposalSkeleton';
 
 export default function ProposalList() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
@@ -35,8 +36,18 @@ export default function ProposalList() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      <div>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-bold text-white drop-shadow-lg flex items-center gap-3">
+            <span className="text-4xl">📋</span>
+            Loading Proposals...
+          </h2>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+          {[...Array(4)].map((_, i) => (
+            <ProposalSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
