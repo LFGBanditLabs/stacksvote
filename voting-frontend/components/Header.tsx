@@ -87,6 +87,7 @@ export default function Header() {
             ) : (
               <button
                 onClick={connectWallet}
+                aria-label="Connect wallet"
                 className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:scale-105 text-white px-8 py-2.5 rounded-xl transition-all duration-300 font-bold shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-500/60"
               >
                 Connect Wallet
