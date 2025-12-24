@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Proposal, castVote } from '@/lib/stacks';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveVoteToHistory, getUserVoteOnProposal } from '@/lib/voteHistory';
@@ -51,7 +52,11 @@ export default function ProposalCard({ proposal, onVoteSuccess }: ProposalCardPr
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-purple-200 group hover:-translate-y-1">
       <div className="flex items-start justify-between mb-5">
-        <h3 className="text-2xl font-bold text-gray-900 flex-1 group-hover:text-purple-600 transition-colors">{proposal.title}</h3>
+        <Link href={`/proposal/${proposal.id}`}>
+          <h3 className="text-2xl font-bold text-gray-900 flex-1 group-hover:text-purple-600 transition-colors cursor-pointer hover:underline">
+            {proposal.title}
+          </h3>
+        </Link>
         <span
           className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${
             proposal.executed
