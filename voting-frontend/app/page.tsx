@@ -12,6 +12,7 @@ export default function Home() {
 
   return (
     <div className="max-w-6xl mx-auto">
+      {/* SEO Meta tags handled in metadata */}
       <div className="text-center mb-16">
         <div className="inline-block mb-6 animate-bounce">
           <div className="text-7xl">🗳️</div>
@@ -23,7 +24,8 @@ export default function Home() {
           </span>
         </h1>
         <p className="text-xl md:text-2xl text-white/95 mb-12 max-w-3xl mx-auto font-medium leading-relaxed drop-shadow-lg">
-          Create proposals and vote on important decisions using secure blockchain technology
+          Create proposals and vote on important decisions using secure blockchain technology.
+          Join the decentralized governance revolution.
         </p>
 
         {!stxAddress && (
