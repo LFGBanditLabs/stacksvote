@@ -9,6 +9,7 @@ export default function ProposalList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'executed'>('all');
 
   const fetchProposals = async () => {
     setLoading(true);
@@ -78,6 +79,14 @@ export default function ProposalList() {
       proposal.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Further filter by status
+  const finalFilteredProposals = filteredProposals.filter((proposal) => {
+    if (statusFilter === 'all') return true;
+    if (statusFilter === 'active') return !proposal.executed;
+    if (statusFilter === 'executed') return proposal.executed;
+    return true;
+  });
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -120,13 +129,47 @@ export default function ProposalList() {
         )}
       </div>
 
-      {filteredProposals.length === 0 ? (
+      {/* Status Filter */}
+      <div className="mb-6 flex gap-3">
+        <button
+          onClick={() => setStatusFilter('all')}
+          className={`px-6 py-3 rounded-xl font-bold transition-all ${
+            statusFilter === 'all'
+              ? 'bg-white text-purple-600 shadow-xl scale-105'
+              : 'bg-white/70 text-gray-700 hover:bg-white/90 shadow-md'
+          }`}
+        >
+          📋 All ({proposals.length})
+        </button>
+        <button
+          onClick={() => setStatusFilter('active')}
+          className={`px-6 py-3 rounded-xl font-bold transition-all ${
+            statusFilter === 'active'
+              ? 'bg-white text-green-600 shadow-xl scale-105'
+              : 'bg-white/70 text-gray-700 hover:bg-white/90 shadow-md'
+          }`}
+        >
+          ● Active ({proposals.filter((p) => !p.executed).length})
+        </button>
+        <button
+          onClick={() => setStatusFilter('executed')}
+          className={`px-6 py-3 rounded-xl font-bold transition-all ${
+            statusFilter === 'executed'
+              ? 'bg-white text-gray-600 shadow-xl scale-105'
+              : 'bg-white/70 text-gray-700 hover:bg-white/90 shadow-md'
+          }`}
+        >
+          ✓ Executed ({proposals.filter((p) => p.executed).length})
+        </button>
+      </div>
+
+      {finalFilteredProposals.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl shadow-md">
           <p className="text-xl text-gray-600">No proposals match your search.</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-          {filteredProposals.map((proposal) => (
+          {finalFilteredProposals.map((proposal) => (
             <ProposalCard
               key={proposal.id}
               proposal={proposal}
