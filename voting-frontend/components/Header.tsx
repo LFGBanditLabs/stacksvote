@@ -1,10 +1,28 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from 'react';
+import { getSTXBalance } from '@/lib/balance';
 import Link from 'next/link';
 
 export default function Header() {
   const { stxAddress, connectWallet, disconnectWallet } = useAuth();
+  const [balance, setBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (stxAddress) {
+      getSTXBalance(stxAddress).then(setBalance);
+      
+      // Refresh balance every 30 seconds
+      const interval = setInterval(() => {
+        getSTXBalance(stxAddress).then(setBalance);
+      }, 30000);
+
+      return () => clearInterval(interval);
+    } else {
+      setBalance(null);
+    }
+  }, [stxAddress]);
 
   return (
     <header className="backdrop-blur-xl bg-white/80 border-b border-white/20 sticky top-0 z-50 shadow-lg shadow-purple-500/10">
@@ -40,7 +58,14 @@ export default function Header() {
 
             {stxAddress ? (
               <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200/50 px-4 py-2.5 rounded-xl backdrop-blur-sm">
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200/50 px-4 py-2.5 rounded-xl backdrop-blur-sm flex items-center gap-3">
+                  <div>
+                    <div className="text-xs text-gray-500 font-semibold mb-0.5">Balance</div>
+                    <div className="text-sm font-bold text-purple-700">
+                      {balance !== null ? `${balance.toFixed(2)} STX` : '...'} 
+                    </div>
+                  </div>
+                  <div className="w-px h-8 bg-purple-200"></div>
                   <span className="text-sm font-mono font-bold text-purple-700">
                     {stxAddress.slice(0, 6)}...{stxAddress.slice(-4)}
                   </span>
