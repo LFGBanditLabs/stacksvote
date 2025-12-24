@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { createProposal } from '@/lib/stacks';
+import { validateProposalTitle, validateProposalDescription, validateDuration } from '@/lib/validation';
 
 // Disable static generation for this page
 export const dynamic = 'force-dynamic';
@@ -16,6 +17,7 @@ export default function CreateProposal() {
   const [duration, setDuration] = useState('144'); // ~1 day
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState<{title?: string; description?: string; duration?: string}>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +27,21 @@ export default function CreateProposal() {
       return;
     }
 
-    if (!title || !description || !duration) {
-      setMessage('Please fill in all fields');
+    // Validate all fields
+    const titleError = validateProposalTitle(title);
+    const descError = validateProposalDescription(description);
+    const durationError = validateDuration(duration);
+
+    if (titleError || descError || durationError) {
+      setErrors({
+        title: titleError || undefined,
+        description: descError || undefined,
+        duration: durationError || undefined,
+      });
       return;
     }
 
+    setErrors({});
     setLoading(true);
     setMessage('');
 
@@ -92,8 +104,11 @@ export default function CreateProposal() {
               placeholder="Enter proposal title (max 100 characters)"
               maxLength={100}
               required
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all"
+              className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all ${
+                errors.title ? 'border-red-500' : 'border-gray-200'
+              }`}
             />
+            {errors.title && <p className="text-sm text-red-600 mt-2">{errors.title}</p>}
             <p className="text-sm text-gray-500 mt-2">{title.length}/100 characters</p>
           </div>
 
@@ -107,10 +122,13 @@ export default function CreateProposal() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter proposal description (max 500 characters)"
               maxLength={500}
-              rows={6}
               required
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all resize-none"
+              rows={6}
+              className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all resize-none ${
+                errors.description ? 'border-red-500' : 'border-gray-200'
+              }`}
             />
+            {errors.description && <p className="text-sm text-red-600 mt-2">{errors.description}</p>}
             <p className="text-sm text-gray-500 mt-2">{description.length}/500 characters</p>
           </div>
 
@@ -126,8 +144,11 @@ export default function CreateProposal() {
               placeholder="Duration in blocks"
               min="1"
               required
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all"
+              className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all ${
+                errors.duration ? 'border-red-500' : 'border-gray-200'
+              }`}
             />
+            {errors.duration && <p className="text-sm text-red-600 mt-2">{errors.duration}</p>}
             <p className="text-sm text-gray-500 mt-2">
               1 block ≈ 10 minutes. Default: 144 blocks ≈ 1 day
             </p>
