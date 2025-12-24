@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Proposal, castVote } from '@/lib/stacks';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveVoteToHistory, getUserVoteOnProposal } from '@/lib/voteHistory';
+import ProposalCountdown from './ProposalCountdown';
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -81,11 +82,9 @@ export default function ProposalCard({ proposal, onVoteSuccess }: ProposalCardPr
         </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-600 font-semibold flex items-center gap-2">
-            <span className="text-pink-500">⏱️</span> Blocks:
+            <span className="text-pink-500">⏱️</span> Status:
           </span>
-          <span className="font-bold text-gray-800 bg-white px-3 py-1 rounded-lg">
-            {proposal.startBlock} → {proposal.endBlock}
-          </span>
+          <ProposalCountdown startBlock={proposal.startBlock} endBlock={proposal.endBlock} />
         </div>
       </div>
 
