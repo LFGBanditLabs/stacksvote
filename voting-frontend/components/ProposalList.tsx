@@ -11,6 +11,7 @@ export default function ProposalList() {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'executed'>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'votes' | 'ending'>('newest');
 
   const fetchProposals = async () => {
     setLoading(true);
@@ -98,6 +99,20 @@ export default function ProposalList() {
     return true;
   });
 
+  // Sort proposals
+  const sortedProposals = [...finalFilteredProposals].sort((a, b) => {
+    if (sortBy === 'newest') {
+      return b.id - a.id;
+    } else if (sortBy === 'votes') {
+      const aVotes = a.yesVotes + a.noVotes;
+      const bVotes = b.yesVotes + b.noVotes;
+      return bVotes - aVotes;
+    } else if (sortBy === 'ending') {
+      return a.endBlock - b.endBlock;
+    }
+    return 0;
+  });
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -141,7 +156,7 @@ export default function ProposalList() {
       </div>
 
       {/* Status Filter */}
-      <div className="mb-6 flex gap-3">
+      <div className="mb-6 flex gap-3 flex-wrap">
         <button
           onClick={() => setStatusFilter('all')}
           className={`px-6 py-3 rounded-xl font-bold transition-all ${
@@ -172,15 +187,28 @@ export default function ProposalList() {
         >
           ✓ Executed ({proposals.filter((p) => p.executed).length})
         </button>
+
+        {/* Sort Dropdown */}
+        <div className="ml-auto">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="px-6 py-3 rounded-xl font-bold bg-white/90 text-gray-700 shadow-md border-2 border-white/50 focus:outline-none focus:ring-2 focus:ring-purple-300"
+          >
+            <option value="newest">🆕 Newest First</option>
+            <option value="votes">🔥 Most Voted</option>
+            <option value="ending">⏰ Ending Soon</option>
+          </select>
+        </div>
       </div>
 
-      {finalFilteredProposals.length === 0 ? (
+      {sortedProposals.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl shadow-md">
           <p className="text-xl text-gray-600">No proposals match your search.</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-          {finalFilteredProposals.map((proposal) => (
+          {sortedProposals.map((proposal) => (
             <ProposalCard
               key={proposal.id}
               proposal={proposal}
