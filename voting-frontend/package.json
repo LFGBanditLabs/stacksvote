@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "cross-env NEXT_PRIVATE_DISABLE_TURBOPACK=1 next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@stacks/connect": "^8.2.3",
