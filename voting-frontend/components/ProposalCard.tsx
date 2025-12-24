@@ -120,6 +120,21 @@ export default function ProposalCard({ proposal, onVoteSuccess }: ProposalCardPr
         </div>
       </div>
 
+      <div className="flex gap-2 mb-3">
+        <button
+          onClick={() => {
+            const url = `${window.location.origin}/proposal/${proposal.id}`;
+            navigator.clipboard.writeText(url);
+            setMessage('Link copied to clipboard!');
+            setTimeout(() => setMessage(''), 2000);
+          }}
+          className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold text-sm transition-all"
+          title="Share proposal"
+        >
+          🔗 Share
+        </button>
+      </div>
+      
       <div className="flex gap-4">
         <button
           onClick={() => handleVote(true)}
