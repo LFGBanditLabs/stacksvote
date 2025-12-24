@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Proposal, castVote } from '@/lib/stacks';
 import { useAuth } from '@/contexts/AuthContext';
+import { saveVoteToHistory, getUserVoteOnProposal } from '@/lib/voteHistory';
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -13,6 +14,11 @@ export default function ProposalCard({ proposal, onVoteSuccess }: ProposalCardPr
   const { userData } = useAuth();
   const [voting, setVoting] = useState(false);
   const [message, setMessage] = useState('');
+  const [userVote, setUserVote] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setUserVote(getUserVoteOnProposal(proposal.id));
+  }, [proposal.id]);
 
   const totalVotes = proposal.yesVotes + proposal.noVotes;
   const yesPercentage = totalVotes > 0 ? (proposal.yesVotes / totalVotes) * 100 : 0;
@@ -29,6 +35,8 @@ export default function ProposalCard({ proposal, onVoteSuccess }: ProposalCardPr
 
     try {
       await castVote(proposal.id, voteChoice);
+      saveVoteToHistory(proposal.id, voteChoice, proposal.title);
+      setUserVote(voteChoice);
       setMessage('Vote cast successfully!');
       setTimeout(() => {
         onVoteSuccess();
@@ -112,16 +120,20 @@ export default function ProposalCard({ proposal, onVoteSuccess }: ProposalCardPr
         <button
           onClick={() => handleVote(true)}
           disabled={voting || proposal.executed || !userData}
-          className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-3 px-6 rounded-xl transition-all duration-300 font-bold text-lg shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 disabled:cursor-not-allowed disabled:shadow-none hover:scale-105 active:scale-95"
+          className={`flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-3 px-6 rounded-xl transition-all duration-300 font-bold text-lg shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 disabled:cursor-not-allowed disabled:shadow-none hover:scale-105 active:scale-95 ${
+            userVote === true ? 'ring-4 ring-green-300' : ''
+          }`}
         >
-          {voting ? '⏳ Voting...' : '👍 Vote Yes'}
+          {voting ? '⏳ Voting...' : userVote === true ? '✓ Voted Yes' : '👍 Vote Yes'}
         </button>
         <button
           onClick={() => handleVote(false)}
           disabled={voting || proposal.executed || !userData}
-          className="flex-1 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-3 px-6 rounded-xl transition-all duration-300 font-bold text-lg shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 disabled:cursor-not-allowed disabled:shadow-none hover:scale-105 active:scale-95"
+          className={`flex-1 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 disabled:from-gray-300 disabled:to-gray-400 text-white py-3 px-6 rounded-xl transition-all duration-300 font-bold text-lg shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 disabled:cursor-not-allowed disabled:shadow-none hover:scale-105 active:scale-95 ${
+            userVote === false ? 'ring-4 ring-red-300' : ''
+          }`}
         >
-          {voting ? '⏳ Voting...' : '👎 Vote No'}
+          {voting ? '⏳ Voting...' : userVote === false ? '✓ Voted No' : '👎 Vote No'}
         </button>
       </div>
 
