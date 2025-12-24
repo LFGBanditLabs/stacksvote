@@ -1,5 +1,6 @@
 ;; Voting Smart Contract using Clarity 4 Features
 ;; This contract implements a decentralized voting system with proposal creation and voting
+;; Version: 1.1.0
 
 ;; Constants
 (define-constant contract-owner tx-sender)

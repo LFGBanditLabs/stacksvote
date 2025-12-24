@@ -3,11 +3,15 @@
 import { useState, useEffect } from 'react';
 import { getAllProposals, Proposal } from '@/lib/stacks';
 import ProposalCard from '@/components/ProposalCard';
+import ProposalSkeleton from '@/components/ProposalSkeleton';
 
 export default function ProposalList() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'executed'>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'votes' | 'ending'>('newest');
 
   const fetchProposals = async () => {
     setLoading(true);
@@ -33,8 +37,18 @@ export default function ProposalList() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      <div>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-bold text-white drop-shadow-lg flex items-center gap-3">
+            <span className="text-4xl">📋</span>
+            Loading Proposals...
+          </h2>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+          {[...Array(4)].map((_, i) => (
+            <ProposalSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -70,6 +84,35 @@ export default function ProposalList() {
     );
   }
 
+  // Filter proposals based on search query
+  const filteredProposals = proposals.filter(
+    (proposal) =>
+      proposal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      proposal.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Further filter by status
+  const finalFilteredProposals = filteredProposals.filter((proposal) => {
+    if (statusFilter === 'all') return true;
+    if (statusFilter === 'active') return !proposal.executed;
+    if (statusFilter === 'executed') return proposal.executed;
+    return true;
+  });
+
+  // Sort proposals
+  const sortedProposals = [...finalFilteredProposals].sort((a, b) => {
+    if (sortBy === 'newest') {
+      return b.id - a.id;
+    } else if (sortBy === 'votes') {
+      const aVotes = a.yesVotes + a.noVotes;
+      const bVotes = b.yesVotes + b.noVotes;
+      return bVotes - aVotes;
+    } else if (sortBy === 'ending') {
+      return a.endBlock - b.endBlock;
+    }
+    return 0;
+  });
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -85,15 +128,95 @@ export default function ProposalList() {
         </button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-        {proposals.map((proposal) => (
-          <ProposalCard
-            key={proposal.id}
-            proposal={proposal}
-            onVoteSuccess={fetchProposals}
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="🔍 Search proposals by title or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-6 py-4 pl-14 rounded-2xl border-2 border-white/50 bg-white/95 backdrop-blur-xl shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-400 transition-all text-gray-800 placeholder-gray-500 font-medium"
           />
-        ))}
+          <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-2xl">🔍</span>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xl"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        {searchQuery && (
+          <p className="text-white mt-2 ml-2 font-medium">
+            Found {filteredProposals.length} proposal{filteredProposals.length !== 1 ? 's' : ''}
+          </p>
+        )}
       </div>
+
+      {/* Status Filter */}
+      <div className="mb-6 flex gap-3 flex-wrap">
+        <button
+          onClick={() => setStatusFilter('all')}
+          className={`px-6 py-3 rounded-xl font-bold transition-all ${
+            statusFilter === 'all'
+              ? 'bg-white text-purple-600 shadow-xl scale-105'
+              : 'bg-white/70 text-gray-700 hover:bg-white/90 shadow-md'
+          }`}
+        >
+          📋 All ({proposals.length})
+        </button>
+        <button
+          onClick={() => setStatusFilter('active')}
+          className={`px-6 py-3 rounded-xl font-bold transition-all ${
+            statusFilter === 'active'
+              ? 'bg-white text-green-600 shadow-xl scale-105'
+              : 'bg-white/70 text-gray-700 hover:bg-white/90 shadow-md'
+          }`}
+        >
+          ● Active ({proposals.filter((p) => !p.executed).length})
+        </button>
+        <button
+          onClick={() => setStatusFilter('executed')}
+          className={`px-6 py-3 rounded-xl font-bold transition-all ${
+            statusFilter === 'executed'
+              ? 'bg-white text-gray-600 shadow-xl scale-105'
+              : 'bg-white/70 text-gray-700 hover:bg-white/90 shadow-md'
+          }`}
+        >
+          ✓ Executed ({proposals.filter((p) => p.executed).length})
+        </button>
+
+        {/* Sort Dropdown */}
+        <div className="ml-auto">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="px-6 py-3 rounded-xl font-bold bg-white/90 text-gray-700 shadow-md border-2 border-white/50 focus:outline-none focus:ring-2 focus:ring-purple-300"
+          >
+            <option value="newest">🆕 Newest First</option>
+            <option value="votes">🔥 Most Voted</option>
+            <option value="ending">⏰ Ending Soon</option>
+          </select>
+        </div>
+      </div>
+
+      {sortedProposals.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-xl shadow-md">
+          <p className="text-xl text-gray-600">No proposals match your search.</p>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+          {sortedProposals.map((proposal) => (
+            <ProposalCard
+              key={proposal.id}
+              proposal={proposal}
+              onVoteSuccess={fetchProposals}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
