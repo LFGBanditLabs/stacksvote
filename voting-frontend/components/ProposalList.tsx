@@ -1,24 +1,42 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAllProposals, Proposal } from '@/lib/stacks';
+import { getPaginatedProposals, Proposal } from '@/lib/stacks';
 import ProposalCard from '@/components/ProposalCard';
 import ProposalSkeleton from '@/components/ProposalSkeleton';
 
 export default function ProposalList() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'executed'>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'votes' | 'ending'>('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 10;
 
-  const fetchProposals = async () => {
-    setLoading(true);
+  const fetchProposals = async (page: number = 1, append: boolean = false) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     setError('');
     try {
-      const data = await getAllProposals();
-      setProposals(data);
+      const { proposals: data, totalCount: count, hasMore: more } = await getPaginatedProposals(page, pageSize);
+      
+      if (append) {
+        setProposals(prev => [...prev, ...data]);
+      } else {
+        setProposals(data);
+      }
+      
+      setTotalCount(count);
+      setHasMore(more);
+      setCurrentPage(page);
     } catch (err: any) {
       // Check if it's a contract not found error
       if (err.message && err.message.includes('NoSuchContract')) {
@@ -28,7 +46,12 @@ export default function ProposalList() {
       }
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  };
+
+  const loadMore = () => {
+    fetchProposals(currentPage + 1, true);
   };
 
   useEffect(() => {
@@ -118,10 +141,10 @@ export default function ProposalList() {
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-bold text-white drop-shadow-lg flex items-center gap-3">
           <span className="text-4xl">📋</span>
-          Active Proposals ({proposals.length})
+          Active Proposals ({totalCount})
         </h2>
         <button
-          onClick={fetchProposals}
+          onClick={() => fetchProposals(1)}
           className="bg-white hover:bg-white/90 text-purple-600 px-6 py-3 rounded-xl transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center gap-2"
         >
           <span className="text-xl">🔄</span> Refresh
@@ -207,15 +230,44 @@ export default function ProposalList() {
           <p className="text-xl text-gray-600">No proposals match your search.</p>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-          {sortedProposals.map((proposal) => (
-            <ProposalCard
-              key={proposal.id}
-              proposal={proposal}
-              onVoteSuccess={fetchProposals}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+            {sortedProposals.map((proposal) => (
+              <ProposalCard
+                key={proposal.id}
+                proposal={proposal}
+                onVoteSuccess={() => fetchProposals(1)}
+              />
+            ))}
+          </div>
+          
+          {/* Pagination Info and Load More Button */}
+          <div className="mt-8 text-center space-y-4">
+            <div className="text-white text-lg font-semibold drop-shadow-lg">
+              Showing {proposals.length} of {totalCount} proposals
+            </div>
+            
+            {hasMore && (
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-2xl shadow-xl transition-all duration-300 hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Loading More...
+                  </span>
+                ) : (
+                  '📄 Load More Proposals'
+                )}
+              </button>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
