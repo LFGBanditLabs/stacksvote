@@ -137,6 +137,30 @@ export const getProposal = async (proposalId: number): Promise<Proposal | null> 
   }
 };
 
+// Helper function to add delay between API calls
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Helper function with retry logic for rate limiting
+const fetchWithRetry = async <T>(
+  fetchFn: () => Promise<T>,
+  retries = 3,
+  delayMs = 1000
+): Promise<T | null> => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fetchFn();
+    } catch (error: any) {
+      if (error?.message?.includes('429') || error?.message?.includes('Too Many Requests')) {
+        console.log(`Rate limited, retrying in ${delayMs}ms... (attempt ${i + 1}/${retries})`);
+        await delay(delayMs * (i + 1)); // Exponential backoff
+        continue;
+      }
+      throw error; // Re-throw non-rate-limit errors
+    }
+  }
+  return null;
+};
+
 export const getAllProposals = async (): Promise<Proposal[]> => {
   try {
     const count = await getProposalCount();
@@ -149,10 +173,16 @@ export const getAllProposals = async (): Promise<Proposal[]> => {
     
     const proposals: Proposal[] = [];
 
+    // Fetch proposals with delay to avoid rate limiting
     for (let i = 1; i <= count; i++) {
-      const proposal = await getProposal(i);
+      const proposal = await fetchWithRetry(() => getProposal(i));
       if (proposal) {
         proposals.push(proposal);
+      }
+      
+      // Add delay between requests to avoid rate limiting (except for last request)
+      if (i < count) {
+        await delay(300); // 300ms delay between requests
       }
     }
 
