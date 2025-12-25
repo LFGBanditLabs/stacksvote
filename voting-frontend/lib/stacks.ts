@@ -161,36 +161,53 @@ const fetchWithRetry = async <T>(
   return null;
 };
 
-export const getAllProposals = async (): Promise<Proposal[]> => {
+// Get paginated proposals - fetch only specific page
+export const getPaginatedProposals = async (
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{ proposals: Proposal[]; totalCount: number; hasMore: boolean }> => {
   try {
-    const count = await getProposalCount();
-    console.log(`Fetching ${count} proposals...`);
+    const totalCount = await getProposalCount();
+    console.log(`Total proposals: ${totalCount}, fetching page ${page}...`);
     
-    if (count === 0) {
+    if (totalCount === 0) {
       console.log('No proposals found in contract');
-      return [];
+      return { proposals: [], totalCount: 0, hasMore: false };
     }
+    
+    // Calculate range (newest first, so we reverse the calculation)
+    const startIndex = Math.max(totalCount - (page * pageSize) + 1, 1);
+    const endIndex = Math.min(totalCount - ((page - 1) * pageSize), totalCount);
+    
+    console.log(`Fetching proposals ${startIndex} to ${endIndex}`);
     
     const proposals: Proposal[] = [];
 
-    // Fetch proposals with delay to avoid rate limiting
-    for (let i = 1; i <= count; i++) {
+    // Fetch proposals in descending order (newest first)
+    for (let i = endIndex; i >= startIndex; i--) {
       const proposal = await fetchWithRetry(() => getProposal(i));
       if (proposal) {
         proposals.push(proposal);
       }
       
-      // Add delay between requests to avoid rate limiting (except for last request)
-      if (i < count) {
+      // Add delay between requests to avoid rate limiting
+      if (i > startIndex) {
         await delay(300); // 300ms delay between requests
       }
     }
 
-    return proposals.reverse(); // Show newest first
+    const hasMore = startIndex > 1;
+    return { proposals, totalCount, hasMore };
   } catch (error) {
-    console.error('Error fetching all proposals:', error);
-    return [];
+    console.error('Error fetching paginated proposals:', error);
+    return { proposals: [], totalCount: 0, hasMore: false };
   }
+};
+
+// Keep the old function for backward compatibility
+export const getAllProposals = async (): Promise<Proposal[]> => {
+  const { proposals } = await getPaginatedProposals(1, 1000);
+  return proposals;
 };
 
 export const isProposalActive = async (proposalId: number): Promise<boolean> => {
